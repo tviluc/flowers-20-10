@@ -115,8 +115,9 @@
     }
     .is-growing:not(.is-ready) .progress { opacity: 1; }
     .garden-actions {
-      position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); left: 0; right: 0;
+      position: absolute; bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px)); left: 0; right: 0;
       display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; padding: 0 16px;
+      z-index: 5;
     }
     .garden-actions button {
       border: 1px solid #dcb9c8; background: #fffdfcf2; border-radius: 30px;
@@ -608,17 +609,33 @@
       document.getElementById('closeCard').addEventListener('click', closeCard);
       document.getElementById('viewGarden').addEventListener('click', closeCard);
       card.addEventListener('close', () => document.getElementById('readCard').focus({ preventScroll: true }));
-      document.getElementById('replay').addEventListener('click', () => {
-        state = 'idle'; garden.classList.remove('is-growing', 'is-ready');
-        actions.hidden = true; bloomButton.hidden = false; status.textContent = '';
-        document.getElementById('intro').removeAttribute('aria-hidden');
+      function resetGarden() {
+        state = 'idle';
+        garden.classList.remove('is-growing', 'is-ready');
+        actions.hidden = true;
+        bloomButton.hidden = false;
+        status.textContent = '';
+        const intro = document.getElementById('intro');
+        if (intro) intro.removeAttribute('aria-hidden');
+        if (card && card.open) card.close();
         if (bgMusic) {
           bgMusic.pause();
           bgMusic.currentTime = 0;
           isMusicPlaying = false;
           updateMusicUI();
         }
-        bloomButton.focus({ preventScroll: true }); render();
+        render();
+      }
+
+      document.getElementById('replay').addEventListener('click', () => {
+        resetGarden();
+        bloomButton.focus({ preventScroll: true });
+      });
+
+      window.addEventListener('pageshow', (event) => {
+        if (event.persisted || state !== 'idle') {
+          resetGarden();
+        }
       });
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
