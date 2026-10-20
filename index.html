@@ -612,6 +612,12 @@
         state = 'idle'; garden.classList.remove('is-growing', 'is-ready');
         actions.hidden = true; bloomButton.hidden = false; status.textContent = '';
         document.getElementById('intro').removeAttribute('aria-hidden');
+        if (bgMusic) {
+          bgMusic.pause();
+          bgMusic.currentTime = 0;
+          isMusicPlaying = false;
+          updateMusicUI();
+        }
         bloomButton.focus({ preventScroll: true }); render();
       });
       document.addEventListener('visibilitychange', () => {
